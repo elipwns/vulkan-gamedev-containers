@@ -1,7 +1,7 @@
 # Upload Vagrant box to Vagrant Cloud
 param(
     [string]$BoxFile = "vulkan-gamedev-windows-hyperv-final.box",
-    [string]$BoxName = "vulkan-gamedev/windows-hyperv",
+    [string]$BoxName = "elipwns/vulkan-gamedev-windows",
     [string]$Version = "1.0.0"
 )
 

@@ -15,7 +15,7 @@ cd my-vulkan-project
 
 2. **Initialize Vagrant:**
 ```bash
-vagrant init vulkan-gamedev/windows-hyperv
+vagrant init elipwns/vulkan-gamedev-windows
 ```
 
 3. **Start the VM:**

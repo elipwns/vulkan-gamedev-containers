@@ -1,5 +1,5 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "vulkan-gamedev/windows-hyperv"
+  config.vm.box = "elipwns/vulkan-gamedev-windows"
   
   config.vm.provider "hyperv" do |hv|
     hv.memory = 16384
