@@ -104,12 +104,69 @@ if ($DockerHubUsername) {
     Write-Host "⚠️  Skipping Docker Hub (DOCKERHUB_USERNAME not set)"
 }
 
+# Create Git Tag
+Write-Host "🏷️  Creating git tag v$SemanticVersion..."
+try {
+    git tag "v$SemanticVersion" -m "Release v$SemanticVersion - Vulkan GameDev Windows Container"
+    git push origin "v$SemanticVersion"
+    Write-Host "✅ Git tag v$SemanticVersion created and pushed"
+} catch {
+    Write-Host "⚠️  Failed to create git tag: $($_.Exception.Message)"
+}
+
+# Create GitHub Release
+Write-Host "📝 Creating GitHub release v$SemanticVersion..."
+$releaseBody = @"
+🎮 Vulkan GameDev Windows Container v$SemanticVersion
+
+## What's Included
+- ✅ Vulkan SDK $VulkanVersion pre-installed
+- ✅ Visual Studio 2022 Build Tools with C++ workload
+- ✅ CMake 4.1+ for modern C++ builds
+- ✅ Git 2.50+ for version control
+- ✅ PowerShell scripting environment
+
+## Container Images
+- **Docker Hub**: ``elikloft/$ImageName:v$SemanticVersion``
+- **GHCR**: ``ghcr.io/$Username/$ImageName:v$SemanticVersion``
+
+## Quick Start
+````bash
+docker run -it elikloft/$ImageName:v$SemanticVersion powershell
+````
+
+Perfect for CI/CD pipelines and consistent development environments!
+"@
+
+try {
+    $headers = @{
+        "Authorization" = "token $($env:GITHUB_TOKEN)"
+        "Accept" = "application/vnd.github.v3+json"
+    }
+    
+    $releaseData = @{
+        "tag_name" = "v$SemanticVersion"
+        "target_commitish" = "main"
+        "name" = "v$SemanticVersion - Vulkan GameDev Windows Container"
+        "body" = $releaseBody
+        "draft" = $false
+        "prerelease" = $SemanticVersion.StartsWith("0.")
+    } | ConvertTo-Json
+    
+    $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$Username/vulkan-gamedev-windows/releases" -Method Post -Headers $headers -Body $releaseData -ContentType "application/json"
+    Write-Host "✅ GitHub release created: $($response.html_url)"
+} catch {
+    Write-Host "⚠️  Failed to create GitHub release: $($_.Exception.Message)"
+    Write-Host "   You can create it manually at: https://github.com/$Username/vulkan-gamedev-windows/releases/new"
+}
+
+Write-Host ""
 Write-Host "✅ Published successfully!"
 Write-Host ""
 Write-Host "📋 Usage examples:"
-Write-Host "   GHCR:       ghcr.io/$Username/$ImageName:latest"
+Write-Host "   GHCR:       ghcr.io/$Username/$ImageName:v$SemanticVersion"
 if ($DockerHubUsername) {
-    Write-Host "   Docker Hub: $DockerHubUsername/$ImageName:latest"
+    Write-Host "   Docker Hub: $DockerHubUsername/$ImageName:v$SemanticVersion"
 }
 Write-Host ""
 Write-Host "🏷️  Available tags: latest, v$SemanticVersion, vulkan-$VulkanVersion, $BuildDate"
