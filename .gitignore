@@ -22,3 +22,7 @@ Desktop.ini
 # Build artifacts
 *.log
 *.tmp
+
+# Large installer files
+installers/*.exe
+installers/*.msi
