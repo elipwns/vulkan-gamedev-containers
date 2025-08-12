@@ -133,6 +133,5 @@ build {
   # Create Vagrant box
   post-processor "vagrant" {
     output = "vulkan-gamedev-windows-hyperv-{{.Provider}}.box"
-    vagrantfile_template = "vagrant/Vagrantfile-hyperv.template"
   }
 }
