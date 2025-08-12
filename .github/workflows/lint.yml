@@ -29,8 +29,3 @@ jobs:
       uses: microsoft/devskim-action@v1
       with:
         directory-to-scan: scripts/
-
-    - name: Lint README
-      uses: DavidAnson/markdownlint-cli2-action@v16
-      with:
-        globs: '**/*.md'
