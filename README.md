@@ -1,14 +1,16 @@
 # Vulkan GameDev Windows Container
 
-🎯 **Ready-to-use Windows container for Vulkan C++ game development**
+🎯 **Cross-platform Vulkan development environments for game teams**
 
-Pre-built Windows container with Vulkan SDK 1.4.321.1, Visual Studio Build Tools, and CMake. Eliminates CI/CD timeout failures and provides consistent development environments for game engines and graphics applications.
+Pre-built development VMs with Vulkan SDK, compilers, and build tools. Eliminates "works on my machine" problems and provides consistent environments for cross-platform game development.
 
 ## What This Solves
 
-- **Long CI build times** - Pre-install everything instead of downloading during CI
-- **Inconsistent environments** - Same tools and versions every time
-- **Failed installs** - Build once, use many times
+- **"Works on my machine"** - Same tools and versions across the entire team
+- **Onboarding time** - New developers productive in minutes, not days
+- **Environment drift** - Consistent development environment from day one
+- **Cross-platform builds** - Develop on any OS, target any OS
+- **GPU testing** - Hardware-accelerated graphics testing in VMs
 
 ## What's Included
 
@@ -23,35 +25,136 @@ Pre-built Windows container with Vulkan SDK 1.4.321.1, Visual Studio Build Tools
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   This Repo     │───▶│  Local Build    │───▶│  Your Registry  │
-│ (Packer+Ansible)│    │ (Docker Image)  │    │   (Optional)    │
+│   This Repo     │───▶│  Packer Build   │───▶│  Vagrant Box    │
+│ (Packer Config) │    │ (Windows VM)    │    │ (Local Dev)     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │  Docker Image   │
+                       │ (CI/CD Ready)   │
+                       └─────────────────┘
 ```
 
 ## Quick Start
 
-**Use the pre-built image:**
-```yaml
-# In your GitHub Actions
-jobs:
-  build:
-    runs-on: windows-latest
-    container:
-      image: ghcr.io/yourusername/vulkan-gamedev-windows:latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build your Vulkan project
-        run: |
-          cmake -B build
-          cmake --build build --config Release
+**Windows Developer (with GPU-PV):**
+```bash
+vagrant box add elipwns/vulkan-gamedev-windows
+vagrant init elipwns/vulkan-gamedev-windows
+vagrant up --provider=hyperv
+
+# Enable GPU passthrough for testing
+Set-VMGpuPartitionAdapter -VMName "your-vm" -MinPartitionVRAM 1000000000
 ```
 
-**Or run locally:**
+**Cross-Platform Developer:**
+```bash
+vagrant box add elipwns/vulkan-gamedev-windows
+vagrant init elipwns/vulkan-gamedev-windows  
+vagrant up --provider=virtualbox  # Works on Windows/macOS/Linux
+```
+
+**Your game project folder is automatically shared** - edit code on your host, build in the VM!
+
+## Prerequisites
+
+### For Vagrant Box (Local Development)
+
+**Windows (Chocolatey):**
 ```powershell
-docker run -it ghcr.io/yourusername/vulkan-gamedev-windows:latest powershell
+choco install virtualbox vagrant packer
 ```
 
-## Building Your Own Image
+**Linux (Debian/Ubuntu):**
+```bash
+sudo apt update
+sudo apt install virtualbox vagrant
+# Packer
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install packer
+```
+
+**Linux (Arch/Manjaro):**
+```bash
+sudo pacman -S virtualbox vagrant packer
+```
+
+**Linux (Fedora/RHEL):**
+```bash
+sudo dnf install VirtualBox vagrant
+# Packer
+sudo dnf install -y dnf-plugins-core
+sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+sudo dnf install packer
+```
+
+**Manual installation:**
+- **VirtualBox**: https://www.virtualbox.org/wiki/Downloads
+- **Vagrant**: https://www.vagrantup.com/downloads
+- **Packer**: https://www.packer.io/downloads
+
+### For Docker Image (CI/CD)
+- **Docker Desktop**: https://www.docker.com/products/docker-desktop
+
+## Building Your Own Environment
+
+### Option 1A: VirtualBox (Basic 3D Acceleration)
+
+**Step 1: Build the Vagrant box**
+```powershell
+# Default build (8GB RAM, 4 CPUs, 80GB disk)
+.\build-vagrant-box.ps1
+
+# High-end build (16GB RAM, 8 CPUs, 120GB disk)
+.\build-vagrant-box.ps1 -Memory 16384 -CPUs 8 -DiskSize 120000
+
+# Low-end build (4GB RAM, 2 CPUs, 60GB disk)
+.\build-vagrant-box.ps1 -Memory 4096 -CPUs 2 -DiskSize 60000
+```
+
+**Step 2: Add and use the box**
+```powershell
+vagrant box add vulkan-gamedev-windows vulkan-gamedev-windows-virtualbox.box
+vagrant init vulkan-gamedev-windows
+vagrant up
+```
+
+### Option 1B: Hyper-V with GPU-PV (High-Performance Vulkan)
+
+**Prerequisites:** Windows 11 Pro/Enterprise with Hyper-V enabled
+
+**Step 1: Enable Hyper-V (if not already enabled)**
+```powershell
+# Run as Administrator
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+# Reboot required
+```
+
+**Step 2: Build the Hyper-V box**
+```powershell
+# Default build
+.\build-hyperv-box.ps1
+
+# High-end build (32GB RAM, 8 CPUs, 200GB disk)
+.\build-hyperv-box.ps1 -Memory 32768 -CPUs 8 -DiskSize 200000
+```
+
+**Step 3: Add and use the box**
+```powershell
+vagrant box add vulkan-gamedev-hyperv vulkan-gamedev-windows-hyperv-hyperv.box
+vagrant init vulkan-gamedev-hyperv
+vagrant up --provider=hyperv
+```
+
+**Step 4: Enable GPU-PV for RTX/high-end GPU access**
+```powershell
+# Run as Administrator on host after VM is running
+Get-VM 'vulkan-gamedev-hyperv' | Set-VMGpuPartitionAdapter -MinPartitionVRAM 1000000000 -MaxPartitionVRAM 1000000000 -OptimalPartitionVRAM 1000000000 -MinPartitionEncode 1000000000 -MaxPartitionEncode 1000000000 -OptimalPartitionEncode 1000000000 -MinPartitionDecode 1000000000 -MaxPartitionDecode 1000000000 -OptimalPartitionDecode 1000000000 -MinPartitionCompute 1000000000 -MaxPartitionCompute 1000000000 -OptimalPartitionCompute 1000000000
+```
+
+### Option 2: Docker Image (CI/CD)
 
 **Step 1: Download Vulkan SDK installer**
 ```powershell
@@ -60,7 +163,7 @@ docker run -it ghcr.io/yourusername/vulkan-gamedev-windows:latest powershell
 
 **Step 2: Build the Docker image**
 ```powershell
-docker build -t vulkan-gamedev-windows:latest .
+docker build -f docker/Dockerfile -t vulkan-gamedev-windows:latest .
 ```
 
 **Step 3: Test your image**
@@ -113,15 +216,31 @@ jobs:
 
 ```
 vulkan-gamedev-windows/
-├── Dockerfile                    # Container build configuration
+├── packer/
+│   ├── windows-vm.pkr.hcl        # Packer VM build configuration
+│   ├── windows-hyperv.pkr.hcl    # Packer Hyper-V build configuration
+│   └── scripts/                  # VM provisioning scripts
+│       ├── unattend.xml          # Windows unattended install
+│       ├── setup-ssh.ps1         # SSH server setup
+│       ├── install-desktop.ps1   # Windows GUI installation
+│       ├── install-vulkan.ps1    # Vulkan SDK installation
+│       ├── install-dev-tools.ps1 # Development tools
+│       ├── configure-vm.ps1      # VM optimization
+│       └── cleanup.ps1           # Final cleanup
+├── vagrant/
+│   ├── Vagrantfile.template      # Vagrant box template
+│   └── Vagrantfile-hyperv.template # Vagrant Hyper-V template
+├── docker/
+│   └── Dockerfile                # Container build configuration
 ├── scripts/
-│   └── download-installers.ps1   # Download Vulkan SDK
+│   └── download-installers.ps1   # Download Vulkan SDK for Docker
 ├── installers/                   # Downloaded SDK installers
+├── build-vagrant-box.ps1         # Build Vagrant box
+├── build-hyperv-box.ps1          # Build Hyper-V box with GPU-PV
 ├── publish.ps1                   # Automated publishing script
 ├── bump-version.ps1              # Version management helper
 ├── VERSION                       # Current semantic version
 ├── .env.example                  # Template for authentication
-├── .env                          # Your tokens (git-ignored)
 └── README.md
 ```
 
@@ -136,12 +255,42 @@ vulkan-gamedev-windows/
 - `vulkan-1.4.321.1` - Vulkan SDK version
 - `2024-12-19` - Build date tags
 
+## Provider Options
+
+**For High-Performance Vulkan Development:**
+- **Hyper-V + GPU-PV** (Windows 11 Pro) - Direct GPU access for testing
+- **VirtualBox** (Windows/macOS/Linux) - Cross-platform compatibility
+
+**Use Cases:**
+- **Consistent development environment** across team members
+- **CI/CD builds** with pre-installed tools
+- **GPU-accelerated testing** (Hyper-V only)
+- **Cross-platform compatibility** (VirtualBox)
+
+## Team Development Workflow
+
+**Day 1: New Team Member**
+```bash
+# 5 minutes to productive development
+vagrant box add elipwns/vulkan-gamedev-windows
+vagrant up
+vagrant ssh
+# Ready to build! No "install Visual Studio, download SDK, configure paths..."
+```
+
+**Daily Development:**
+- 📝 **Edit code** on your host OS (VS Code, CLion, etc.)
+- 🔨 **Build & test** in the VM (consistent environment)
+- 🎮 **GPU testing** with hardware acceleration (Hyper-V)
+- 🚀 **Deploy** knowing it works the same everywhere
+
 ## Use Cases
 
-- **Game Engine CI/CD** - Build Vulkan-based game engines
-- **Graphics Applications** - Develop Vulkan graphics software
-- **Shader Development** - Compile and test GLSL/HLSL shaders
-- **Cross-platform Builds** - Consistent Windows build environment
+- **Game Studios** - Consistent Vulkan development across Windows/Linux teams
+- **Graphics Teams** - Same SDK versions, no environment-specific bugs
+- **CI/CD Pipelines** - Build environment matches developer environment
+- **Open Source Projects** - Contributors get productive immediately
+- **Education** - Students focus on graphics programming, not setup
 
 ## Troubleshooting
 
@@ -158,6 +307,34 @@ vulkan-gamedev-windows/
 - Current version is tracked in the `VERSION` file
 - Use `bump-version.ps1` for easy version bumping
 - Publishing script automatically reads current version
+
+## Troubleshooting
+
+**Packer build fails?**
+- Ensure VirtualBox is installed and running
+- Check that virtualization is enabled in BIOS
+- Verify you have enough disk space (~15GB for build)
+- Try running as Administrator if permission issues
+
+**Vagrant box won't start?**
+- Ensure VirtualBox Guest Additions installed properly
+- Check VM has enough memory allocated (8GB recommended)
+- Verify SSH is working: `vagrant ssh`
+
+**Hyper-V issues?**
+- Ensure Hyper-V is enabled: `Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All`
+- Run PowerShell as Administrator for Packer builds
+- For GPU-PV: Ensure your GPU supports it (RTX 20xx+ or similar)
+- Check Windows Defender/Antivirus isn't blocking Hyper-V operations
+
+**Docker build fails?**
+- Ensure Docker Desktop is running in Windows containers mode
+- Verify Vulkan SDK installer was downloaded to installers/
+- Check available disk space (build requires ~15GB)
+
+**Need different tools?**
+- Fork this repo and modify the Packer scripts in `packer/scripts/`
+- Add your tools to the installation steps
 
 ## Benefits
 
