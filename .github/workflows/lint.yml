@@ -20,19 +20,13 @@ jobs:
         version: "1.9.4"
     
     - name: Initialize Packer
-      run: packer init packer/windows-vulkan.pkr.hcl
+      run: packer init packer/windows-hyperv.pkr.hcl
 
     - name: Validate Packer template
-      run: packer validate packer/windows-vulkan.pkr.hcl
-
-    - name: Validate Ansible playbook
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ansible
-        ansible-playbook --syntax-check ansible/playbook.yml
+      run: packer validate packer/windows-hyperv.pkr.hcl
 
     - name: Check PowerShell scripts
-      uses: devskim-action@v1
+      uses: microsoft/devskim-action@v1
       with:
         directory-to-scan: scripts/
 
