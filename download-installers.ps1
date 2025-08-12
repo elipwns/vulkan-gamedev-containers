@@ -42,4 +42,4 @@ try {
 
 Write-Host ""
 Write-Host "🎉 Ready for container build!"
-Write-Host "Run: docker build -t vulkan-build-image ."
+Write-Host "Run: docker build -f docker/Dockerfile -t vulkan-gamedev-windows ."
