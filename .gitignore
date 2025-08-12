@@ -1,0 +1,43 @@
+# Packer
+*.log
+packer_cache/
+crash.log
+manifest.json
+
+# Ansible
+*.retry
+.ansible/
+
+# AWS
+.aws/
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+
+# Installers (large files - use Git LFS or download script)
+installers/*.exe
+installers/*.msi
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Environment variables (contains secrets)
+.env

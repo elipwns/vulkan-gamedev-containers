@@ -1,0 +1,42 @@
+name: Lint and Validate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate Packer template
+      uses: hashicorp/setup-packer@main
+      with:
+        version: "1.9.4"
+    
+    - name: Initialize Packer
+      run: packer init packer/windows-vulkan.pkr.hcl
+
+    - name: Validate Packer template
+      run: packer validate packer/windows-vulkan.pkr.hcl
+
+    - name: Validate Ansible playbook
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ansible
+        ansible-playbook --syntax-check ansible/playbook.yml
+
+    - name: Check PowerShell scripts
+      uses: devskim-action@v1
+      with:
+        directory-to-scan: scripts/
+
+    - name: Lint README
+      uses: DavidAnson/markdownlint-cli2-action@v16
+      with:
+        globs: '**/*.md'
