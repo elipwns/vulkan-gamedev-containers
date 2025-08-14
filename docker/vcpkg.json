@@ -1,0 +1,28 @@
+{
+  "name": "game-engine",
+  "version": "0.5.0",
+  "dependencies": [
+    "assimp",
+    "entt",
+    "glfw3",
+    "spirv-headers",
+    "spirv-tools",
+    "glslang",
+    {
+      "name": "imgui",
+      "features": ["glfw-binding", "vulkan-binding"]
+    },
+    "spirv-reflect",
+    "taskflow",
+    "stb",
+    "tinygltf",
+    "tinyobjloader",
+    "vulkan-headers",
+    "vulkan-loader",
+    "vulkan-memory-allocator",
+    "glm",
+    "volk",
+    "nlohmann-json",
+    "ktx"
+  ]
+}

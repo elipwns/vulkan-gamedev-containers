@@ -1,28 +1,33 @@
-# Vagrant
-.vagrant/
-*.box
+# Docker build artifacts
+.dockerignore
 
-# Packer
-packer_cache/
-*.iso
-*.iso.lock
-
-# Temporary directories
-temp/
-vm-export*/
-vagrant-box-temp/
-
-# Environment files
+# Environment files (keep .env.example)
 .env
 
-# Windows
-Thumbs.db
-Desktop.ini
-
-# Build artifacts
-*.log
-*.tmp
-
-# Large installer files
+# Large installer files (download separately)
 installers/*.exe
 installers/*.msi
+
+# Vagrant files (legacy - not used anymore)
+.vagrant/
+*.vmcx
+*.vmrs
+*.VMRS
+
+# Temporary files
+*.tmp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+build/
+dist/

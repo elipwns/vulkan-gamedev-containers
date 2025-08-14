@@ -1,0 +1,76 @@
+FROM ubuntu:22.04
+
+# Metadata labels
+LABEL org.opencontainers.image.title="Vulkan GameDev Linux Container"
+LABEL org.opencontainers.image.description="Ready-to-use Linux container for Vulkan C++ game development with vcpkg dependencies"
+LABEL org.opencontainers.image.url="https://github.com/elipwns/vulkan-gamedev-containers"
+LABEL org.opencontainers.image.source="https://github.com/elipwns/vulkan-gamedev-containers"
+LABEL org.opencontainers.image.vendor="elipwns"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.version="1.0.17"
+LABEL maintainer="elipwns"
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set shell options for better error handling
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Install system dependencies in one layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    pkg-config \
+    curl \
+    zip \
+    unzip \
+    tar \
+    libvulkan-dev \
+    vulkan-tools \
+    vulkan-validationlayers-dev \
+    libglfw3-dev \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxcursor-dev \
+    libxi-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Install and setup vcpkg
+RUN git clone https://github.com/Microsoft/vcpkg.git /vcpkg \
+    && /vcpkg/bootstrap-vcpkg.sh \
+    && ln -s /vcpkg/vcpkg /usr/local/bin/vcpkg
+
+# Copy vcpkg manifest
+COPY docker/vcpkg.json /vcpkg/vcpkg.json
+COPY docker/build.sh /build.sh
+RUN chmod +x /build.sh
+
+# Install vcpkg dependencies and clean up in one layer
+WORKDIR /vcpkg
+RUN /vcpkg/vcpkg install --triplet x64-linux \
+    && /vcpkg/vcpkg install --triplet x64-linux \
+    && echo 'vcpkg packages installed:' \
+    && /vcpkg/vcpkg list \
+    && rm -rf /vcpkg/buildtrees \
+    && rm -rf /vcpkg/downloads/tools \
+    && find /vcpkg/downloads -type f -name '*.tar.gz' -delete \
+    && find /vcpkg/downloads -type f -name '*.zip' -delete \
+    && rm /vcpkg/vcpkg.json
+
+# Set environment variables
+ENV VCPKG_ROOT=/vcpkg
+ENV VULKAN_SDK=/usr
+ENV CMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+# Set working directory
+WORKDIR /workspace
+
+# Verify installations
+RUN echo 'Verifying installations...' \
+    && cmake --version \
+    && git --version \
+    && vcpkg version \
+    && echo "Installed packages: $(vcpkg list | wc -l)" \
+    && echo 'Linux container ready for building!'
