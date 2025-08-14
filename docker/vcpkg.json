@@ -17,6 +17,8 @@
     "stb",
     "tinygltf",
     "tinyobjloader",
+    "vulkan-headers",
+    "vulkan-loader",
     "vulkan-memory-allocator",
     "glm",
     "volk",

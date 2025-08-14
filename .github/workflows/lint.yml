@@ -7,25 +7,48 @@ on:
     branches: [ main ]
 
 jobs:
-  lint:
+  lint-docker:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Validate Packer template
-      uses: hashicorp/setup-packer@main
+    - name: Lint Dockerfiles
+      uses: hadolint/hadolint-action@v3.1.0
       with:
-        version: "1.9.4"
-    
-    - name: Initialize Packer
-      run: packer init packer/windows-hyperv.pkr.hcl
+        dockerfile: docker/Dockerfile
+        failure-threshold: warning
 
-    - name: Validate Packer template
-      run: packer validate packer/windows-hyperv.pkr.hcl
+    - name: Lint Linux Dockerfile
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: docker/Dockerfile.linux
+        failure-threshold: warning
+        ignore: DL3008
+
+    - name: Validate vcpkg manifest
+      run: |
+        if ! jq empty docker/vcpkg.json; then
+          echo "vcpkg.json is not valid JSON"
+          exit 1
+        fi
+        echo "vcpkg.json is valid"
+
+  lint-scripts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Check PowerShell scripts
       uses: microsoft/devskim-action@v1
       with:
-        directory-to-scan: scripts/
+        directory-to-scan: docker/
+
+    - name: Validate shell scripts
+      run: |
+        if [ -f docker/build.sh ]; then
+          shellcheck docker/build.sh
+        fi

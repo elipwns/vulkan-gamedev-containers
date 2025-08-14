@@ -1,0 +1,80 @@
+name: Validate Containers
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Check Linux Dockerfile best practices
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: docker/Dockerfile.linux
+        failure-threshold: warning
+        ignore: DL3008
+
+  validate-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Validate Windows Dockerfile exists
+      run: |
+        if (!(Test-Path "docker/Dockerfile")) {
+          Write-Host "❌ Windows Dockerfile is missing"
+          exit 1
+        }
+        Write-Host "✅ Windows Dockerfile exists"
+
+  validate-manifests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Validate vcpkg manifest
+      run: |
+        if ! jq empty docker/vcpkg.json; then
+          echo "❌ vcpkg.json is not valid JSON"
+          exit 1
+        fi
+        echo "✅ vcpkg.json is valid JSON"
+
+    - name: Check required vcpkg packages
+      run: |
+        # Check that essential Vulkan packages are present
+        REQUIRED_PACKAGES=("vulkan-headers" "vulkan-loader" "glfw3" "glm")
+        
+        for package in "${REQUIRED_PACKAGES[@]}"; do
+          if ! jq -e ".dependencies[] | if type == \"string\" then . else .name end | select(. == \"$package\")" docker/vcpkg.json > /dev/null; then
+            echo "❌ Required package '$package' not found in vcpkg.json"
+            exit 1
+          fi
+        done
+        
+        echo "✅ All required Vulkan packages are present"
+
+    - name: Validate build scripts exist
+      run: |
+        if [ ! -f docker/build.ps1 ]; then
+          echo "❌ Windows build script (build.ps1) is missing"
+          exit 1
+        fi
+        
+        if [ ! -f docker/build.sh ]; then
+          echo "❌ Linux build script (build.sh) is missing"
+          exit 1
+        fi
+        
+        echo "✅ Build scripts are present"
