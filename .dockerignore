@@ -1,0 +1,12 @@
+packer_cache/
+vagrant-box-temp/
+*.box
+*.iso
+.vagrant/
+test/
+web-test/
+*.vhdx
+*.avhdx
+*.vmcx
+*.vmgs
+*.VMRS
