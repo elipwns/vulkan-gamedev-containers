@@ -6,8 +6,11 @@ Production-ready Docker containers for cross-platform Vulkan C++ game developmen
 
 **One command works on both Windows and Linux:**
 ```bash
-# Automatically pulls the right container for your platform
+# GitHub Container Registry (recommended)
 docker pull ghcr.io/elipwns/vulkan-gamedev:latest
+
+# Or Docker Hub
+docker pull elikloft/vulkan-gamedev:latest
 
 # Build your project (works on both platforms)
 docker run --rm -v "$(pwd):/workspace" ghcr.io/elipwns/vulkan-gamedev:latest
@@ -19,6 +22,7 @@ docker run --rm -v "$(pwd):/workspace" ghcr.io/elipwns/vulkan-gamedev:latest
 ```powershell
 # Pull Windows-specific container
 docker pull ghcr.io/elipwns/vulkan-gamedev-windows:latest
+# Or: docker pull elikloft/vulkan-gamedev-windows:latest
 
 # Build your project
 docker run --rm -v "YourProjectPath:C:\workspace" ghcr.io/elipwns/vulkan-gamedev-windows:latest powershell C:/build.ps1
@@ -31,6 +35,7 @@ docker run --rm -it -v "YourProjectPath:C:\workspace" ghcr.io/elipwns/vulkan-gam
 ```bash
 # Pull Linux-specific container
 docker pull ghcr.io/elipwns/vulkan-gamedev-linux:latest
+# Or: docker pull elikloft/vulkan-gamedev-linux:latest
 
 # Build your project
 docker run --rm -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:latest /build.sh
@@ -66,13 +71,16 @@ docker run --rm -it -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:la
 
 ## Available Images
 
-### Multi-Platform (Recommended)
-- `ghcr.io/elipwns/vulkan-gamedev:latest` - Automatically selects Windows or Linux
+### GitHub Container Registry (Primary)
+- `ghcr.io/elipwns/vulkan-gamedev:latest` - Multi-platform (recommended)
 - `ghcr.io/elipwns/vulkan-gamedev:1.0.17` - Specific version
+- `ghcr.io/elipwns/vulkan-gamedev-windows:latest` - Windows only
+- `ghcr.io/elipwns/vulkan-gamedev-linux:latest` - Linux only
 
-### Platform-Specific
-- `ghcr.io/elipwns/vulkan-gamedev-windows:latest` - Windows containers only
-- `ghcr.io/elipwns/vulkan-gamedev-linux:latest` - Linux containers only
+### Docker Hub (Mirror)
+- `elikloft/vulkan-gamedev:latest` - Multi-platform
+- `elikloft/vulkan-gamedev-windows:latest` - Windows only
+- `elikloft/vulkan-gamedev-linux:latest` - Linux only
 
 ## Benefits
 - ✅ **Zero local setup** - No SDK installations needed
