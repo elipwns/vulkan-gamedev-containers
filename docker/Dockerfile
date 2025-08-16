@@ -8,14 +8,15 @@ LABEL org.opencontainers.image.url="https://github.com/elipwns/vulkan-gamedev-co
 LABEL org.opencontainers.image.source="https://github.com/elipwns/vulkan-gamedev-containers"
 LABEL org.opencontainers.image.vendor="elipwns"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.version="1.0.17"
+LABEL org.opencontainers.image.version="1.0.18"
 LABEL maintainer="elipwns"
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-# Copy vcpkg manifest and build script
+# Copy vcpkg manifest and build scripts
 COPY docker/vcpkg.json C:/vcpkg.json
 COPY docker/build.ps1 C:/build.ps1
+COPY docker/build-portable.ps1 C:/build-portable.ps1
 
 # Install Git
 RUN Invoke-WebRequest -Uri 'https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe' -OutFile 'C:/git.exe'; `
