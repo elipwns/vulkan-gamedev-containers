@@ -8,7 +8,8 @@ LABEL org.opencontainers.image.url="https://github.com/elipwns/vulkan-gamedev-co
 LABEL org.opencontainers.image.source="https://github.com/elipwns/vulkan-gamedev-containers"
 LABEL org.opencontainers.image.vendor="elipwns"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.version="1.0.21"
+LABEL org.opencontainers.image.version="1.1.0"
+LABEL org.opencontainers.image.documentation="https://raw.githubusercontent.com/elipwns/vulkan-gamedev-containers/main/README.md"
 LABEL maintainer="elipwns"
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
