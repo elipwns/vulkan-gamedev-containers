@@ -24,8 +24,11 @@ docker run --rm -v "$(pwd):/workspace" ghcr.io/elipwns/vulkan-gamedev:latest
 docker pull ghcr.io/elipwns/vulkan-gamedev-windows:latest
 # Or: docker pull elikloft/vulkan-gamedev-windows:latest
 
-# Build your project
+# Regular build
 docker run --rm -v "YourProjectPath:C:\workspace" ghcr.io/elipwns/vulkan-gamedev-windows:latest powershell C:/build.ps1
+
+# Portable distribution (bundles runtime DLLs)
+docker run --rm -v "YourProjectPath:C:\workspace" ghcr.io/elipwns/vulkan-gamedev-windows:latest powershell C:/build-portable.ps1
 
 # Interactive development
 docker run --rm -it -v "YourProjectPath:C:\workspace" ghcr.io/elipwns/vulkan-gamedev-windows:latest
@@ -37,8 +40,11 @@ docker run --rm -it -v "YourProjectPath:C:\workspace" ghcr.io/elipwns/vulkan-gam
 docker pull ghcr.io/elipwns/vulkan-gamedev-linux:latest
 # Or: docker pull elikloft/vulkan-gamedev-linux:latest
 
-# Build your project
+# Regular build
 docker run --rm -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:latest /build.sh
+
+# AppImage build (creates portable single-file distribution)
+docker run --rm -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:latest /build-appimage.sh
 
 # Interactive development
 docker run --rm -it -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:latest
@@ -54,11 +60,13 @@ docker run --rm -it -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:la
 
 ### Windows Container
 - **Visual Studio 2019 Build Tools** - MSVC compiler and toolchain
-- **PowerShell build script** - Automated CMake configuration
+- **PowerShell build scripts** - Regular and portable distribution builds
+- **Portable packaging** - Bundles runtime DLLs for distribution
 
 ### Linux Container  
 - **GCC/G++ Compiler** - Modern C++ toolchain
-- **Bash build script** - Automated CMake configuration
+- **Bash build scripts** - Regular and AppImage builds
+- **AppImage packaging** - Creates portable single-file distributions
 - **System Vulkan libraries** - Native Linux Vulkan support
 
 ## Pre-installed vcpkg Libraries
@@ -73,7 +81,7 @@ docker run --rm -it -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:la
 
 ### GitHub Container Registry (Primary)
 - `ghcr.io/elipwns/vulkan-gamedev:latest` - Multi-platform (recommended)
-- `ghcr.io/elipwns/vulkan-gamedev:1.0.17` - Specific version
+- `ghcr.io/elipwns/vulkan-gamedev:1.0.18` - Specific version
 - `ghcr.io/elipwns/vulkan-gamedev-windows:latest` - Windows only
 - `ghcr.io/elipwns/vulkan-gamedev-linux:latest` - Linux only
 
@@ -88,6 +96,8 @@ docker run --rm -it -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:la
 - ✅ **Consistent builds** - Identical environment across all machines
 - ✅ **Fast CI/CD** - Pre-compiled dependencies save build time
 - ✅ **Team ready** - Anyone can contribute immediately
+- ✅ **Portable distributions** - AppImage (Linux) and bundled DLLs (Windows)
+- ✅ **End-user friendly** - No runtime dependencies to install
 
 ## Container Details
 
@@ -113,6 +123,25 @@ docker build -f docker/Dockerfile -t vulkan-gamedev-windows .
 
 # Build Linux container (requires Linux Docker)
 docker build -f docker/Dockerfile.linux -t vulkan-gamedev-linux .
+```
+
+## Distribution Options
+
+### Windows Portable Distribution
+Creates a folder with your executable and all required runtime DLLs:
+```
+Game_Engine_Portable/
+├── Game_Engine.exe
+├── msvcp140.dll
+├── vcruntime140.dll
+└── vcruntime140_1.dll
+```
+
+### Linux AppImage Distribution
+Creates a single portable file that runs on any Linux system:
+```bash
+# Run anywhere with Vulkan drivers
+./Game_Engine-x86_64.AppImage
 ```
 
 ## Compatible Projects

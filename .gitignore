@@ -31,3 +31,10 @@ Thumbs.db
 # Build artifacts
 build/
 dist/
+
+# AppImage build artifacts
+AppDir/
+*.AppImage
+
+# Windows portable distribution
+Game_Engine_Portable/
