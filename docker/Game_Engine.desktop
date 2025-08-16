@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Game Engine
+Comment=Vulkan-based Game Engine
+Exec=Game_Engine
+Icon=Game_Engine
+Categories=Game;
+Terminal=false
