@@ -18,5 +18,16 @@ if ! cmake --build build --config "$BUILD_TYPE"; then
     exit 1
 fi
 
+# Determine the correct executable path based on build type
+if [ "$BUILD_TYPE" = "Debug" ]; then
+    EXECUTABLE_PATH="build/Debug/Game_Engine"
+else
+    EXECUTABLE_PATH="build/Release/Game_Engine"
+fi
+
 echo "Build completed successfully!"
-echo "Executable is in: build/"
+echo "Executable: $EXECUTABLE_PATH"
+echo ""
+echo "To run:"
+echo "chmod +x $EXECUTABLE_PATH"
+echo "./$EXECUTABLE_PATH"
