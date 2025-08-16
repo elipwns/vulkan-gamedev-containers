@@ -48,15 +48,15 @@ RUN git config --global http.sslverify false \
     && ln -s /vcpkg/vcpkg /usr/local/bin/vcpkg
 
 # Download and extract AppImageTool
-RUN wget -O /tmp/appimagetool.AppImage \
+WORKDIR /tmp
+RUN wget --progress=dot:giga -O appimagetool.AppImage \
     https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage \
-    && chmod +x /tmp/appimagetool.AppImage \
-    && cd /tmp \
+    && chmod +x appimagetool.AppImage \
     && ./appimagetool.AppImage --appimage-extract \
     && mv squashfs-root /usr/local/appimagetool \
     && printf '#!/bin/bash\nexec /usr/local/appimagetool/AppRun "$@"\n' > /usr/local/bin/appimagetool \
     && chmod +x /usr/local/bin/appimagetool \
-    && rm -f /tmp/appimagetool.AppImage
+    && rm -f appimagetool.AppImage
 
 # Copy vcpkg manifest and build scripts
 COPY docker/vcpkg.json /vcpkg/vcpkg.json
