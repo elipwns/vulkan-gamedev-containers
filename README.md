@@ -81,7 +81,7 @@ docker run --rm -it -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:la
 
 ### GitHub Container Registry (Primary)
 - `ghcr.io/elipwns/vulkan-gamedev:latest` - Multi-platform (recommended)
-- `ghcr.io/elipwns/vulkan-gamedev:1.0.20` - Specific version
+- `ghcr.io/elipwns/vulkan-gamedev:1.0.21` - Specific version
 - `ghcr.io/elipwns/vulkan-gamedev-windows:latest` - Windows only
 - `ghcr.io/elipwns/vulkan-gamedev-linux:latest` - Linux only
 
@@ -96,8 +96,9 @@ docker run --rm -it -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:la
 - ✅ **Consistent builds** - Identical environment across all machines
 - ✅ **Fast CI/CD** - Pre-compiled dependencies save build time
 - ✅ **Team ready** - Anyone can contribute immediately
-- ✅ **Portable distributions** - AppImage (Linux) and bundled DLLs (Windows)
-- ✅ **End-user friendly** - No runtime dependencies to install
+- ✅ **Portable distributions** - AppImage (Linux) and complete portable folder (Windows)
+- ✅ **Resource bundling** - All game assets included in distributions
+- ✅ **End-user friendly** - No runtime dependencies or installation needed
 
 ## Container Details
 
@@ -128,21 +129,33 @@ docker build -f docker/Dockerfile.linux -t vulkan-gamedev-linux .
 ## Distribution Options
 
 ### Windows Portable Distribution
-Creates a folder with your executable and all required runtime DLLs:
+Creates a folder with your executable, all required DLLs, and game resources:
 ```
 Game_Engine_Portable/
 ├── Game_Engine.exe
-├── msvcp140.dll
+├── textures/           # Game textures
+├── shaders/            # Compiled shaders
+├── models/             # 3D models
+├── data/               # Game data
+├── glfw3.dll           # vcpkg libraries
+├── [other vcpkg DLLs]
+├── msvcp140.dll        # VC++ redistributables
 ├── vcruntime140.dll
 └── vcruntime140_1.dll
 ```
 
 ### Linux AppImage Distribution
-Creates a single portable file that runs on any Linux system:
+Creates a single portable file with all resources bundled that runs on any Linux system:
 ```bash
-# Run anywhere with Vulkan drivers
+# Run anywhere with Vulkan drivers - no external dependencies needed
 ./Game_Engine-x86_64.AppImage
 ```
+
+The AppImage includes:
+- Your compiled executable
+- All required shared libraries
+- Complete resource folders (textures, shaders, models, data)
+- Desktop integration files
 
 ## Compatible Projects
 This container works with any CMake-based C++ project that uses vcpkg. Perfect for:

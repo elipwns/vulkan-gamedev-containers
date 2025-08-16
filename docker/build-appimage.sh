@@ -19,10 +19,17 @@ fi
 
 echo "Regular build completed successfully!"
 
+# Determine the correct executable path based on build type
+if [ "$BUILD_TYPE" = "Debug" ]; then
+    EXECUTABLE_PATH="build/Debug/Game_Engine"
+else
+    EXECUTABLE_PATH="build/Release/Game_Engine"
+fi
+
 # Test the executable before packaging
-echo "Testing executable..."
-if ! ldd build/Game_Engine; then
-    echo "Warning: Could not check dependencies"
+echo "Testing executable at $EXECUTABLE_PATH..."
+if ! ldd "$EXECUTABLE_PATH"; then
+    echo "Warning: Could not check dependencies for $EXECUTABLE_PATH"
 fi
 
 # Create AppImage
@@ -35,7 +42,39 @@ mkdir -p AppDir/usr/share/applications
 mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
 
 # Copy executable
-cp build/Game_Engine AppDir/usr/bin/
+cp "$EXECUTABLE_PATH" AppDir/usr/bin/
+
+# Copy texture folder if it exists
+if [ -d "textures" ]; then
+    cp -r textures AppDir/usr/bin/
+    echo "Copied textures folder to AppImage"
+else
+    echo "Warning: textures folder not found - texture loading may fail"
+fi
+
+# Copy shaders folder if it exists
+if [ -d "shaders" ]; then
+    cp -r shaders AppDir/usr/bin/
+    echo "Copied shaders folder to AppImage"
+else
+    echo "Warning: shaders folder not found - shader loading may fail"
+fi
+
+# Copy models folder if it exists
+if [ -d "models" ]; then
+    cp -r models AppDir/usr/bin/
+    echo "Copied models folder to AppImage"
+else
+    echo "Warning: models folder not found - model loading may fail"
+fi
+
+# Copy data folder if it exists
+if [ -d "data" ]; then
+    cp -r data AppDir/usr/bin/
+    echo "Copied data folder to AppImage"
+else
+    echo "Warning: data folder not found - data loading may fail"
+fi
 
 # Create desktop file automatically
 cat > AppDir/Game_Engine.desktop << 'EOF'
@@ -53,7 +92,10 @@ EOF
 cp AppDir/Game_Engine.desktop AppDir/usr/share/applications/
 
 # Copy icon if it exists, otherwise create a placeholder
-if ls *.png 1> /dev/null 2>&1; then
+if [ -f "Game_Engine.png" ]; then
+    cp Game_Engine.png AppDir/usr/share/icons/hicolor/256x256/apps/Game_Engine.png
+    cp Game_Engine.png AppDir/Game_Engine.png
+elif ls *.png 1> /dev/null 2>&1; then
     cp *.png AppDir/usr/share/icons/hicolor/256x256/apps/Game_Engine.png
     cp *.png AppDir/Game_Engine.png
 else
@@ -64,11 +106,11 @@ fi
     
     # Copy ALL required libraries (not just vulkan/glfw)
     echo "Copying required libraries..."
-    ldd build/Game_Engine | grep "=> /" | awk '{print $3}' | while read lib; do
+    ldd "$EXECUTABLE_PATH" | grep "=> /" | awk '{print $3}' | while read lib; do
         if [ -f "$lib" ]; then
             # Skip system libraries that should be available everywhere
             case "$lib" in
-                /lib/x86_64-linux-gnu/* | /usr/lib/x86_64-linux-gnu/libc.* | /usr/lib/x86_64-linux-gnu/libm.* | /usr/lib/x86_64-linux-gnu/libpthread.* | /usr/lib/x86_64-linux-gnu/libdl.*)
+                /lib/x86_64-linux-gnu/* | /usr/lib/x86_64-linux-gnu/libc.* | /usr/lib/x86_64-linux-gnu/libm.* | /usr/lib/x86_64-linux-gnu/libpthread.* | /usr/lib/x86_64-linux-gnu/libdl.* | /lib64/* | */ld-linux-x86-64.so.*)
                     echo "Skipping system library: $lib"
                     ;;
                 *)
@@ -88,14 +130,24 @@ export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
 # Debug output (remove in production)
 echo "AppImage starting..."
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+echo "Working directory: $(pwd)"
+echo "AppImage location: $HERE"
+
+# Change to the directory where the executable and resources are located
+cd "${HERE}/usr/bin"
+echo "Changed working directory to: $(pwd)"
+
+# List contents to verify resources are present
+echo "Contents of current directory:"
+ls -la
 
 # Check if Vulkan is available
 if ! command -v vulkaninfo >/dev/null 2>&1; then
     echo "Warning: vulkaninfo not found, Vulkan may not be available"
 fi
 
-# Run with error output
-exec "${HERE}/usr/bin/Game_Engine" "$@" 2>&1
+# Run with error output from the correct directory
+exec "./Game_Engine" "$@" 2>&1
 EOF
     chmod +x AppDir/AppRun
     
@@ -115,7 +167,11 @@ EOF
 
 
 echo "Build completed!"
-echo "Regular executable: build/Game_Engine"
+echo "Regular executable: $EXECUTABLE_PATH"
+echo ""
+echo "To run the regular executable:"
+echo "chmod +x $EXECUTABLE_PATH"
+echo "./$EXECUTABLE_PATH"
 if [ -f "Game_Engine-x86_64.AppImage" ]; then
     echo "AppImage: Game_Engine-x86_64.AppImage"
     echo ""
