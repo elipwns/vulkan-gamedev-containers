@@ -18,7 +18,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install system dependencies in one layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
     build-essential \
+    gdb \
     cmake \
     git \
     pkg-config \
