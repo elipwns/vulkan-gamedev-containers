@@ -81,7 +81,7 @@ docker run --rm -it -v $(pwd):/workspace ghcr.io/elipwns/vulkan-gamedev-linux:la
 
 ### GitHub Container Registry (Primary)
 - `ghcr.io/elipwns/vulkan-gamedev:latest` - Multi-platform (recommended)
-- `ghcr.io/elipwns/vulkan-gamedev:1.0.18` - Specific version
+- `ghcr.io/elipwns/vulkan-gamedev:1.0.20` - Specific version
 - `ghcr.io/elipwns/vulkan-gamedev-windows:latest` - Windows only
 - `ghcr.io/elipwns/vulkan-gamedev-linux:latest` - Linux only
 
