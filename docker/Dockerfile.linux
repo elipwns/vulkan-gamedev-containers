@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url="https://github.com/elipwns/vulkan-gamedev-co
 LABEL org.opencontainers.image.source="https://github.com/elipwns/vulkan-gamedev-containers"
 LABEL org.opencontainers.image.vendor="elipwns"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.version="1.0.18"
+LABEL org.opencontainers.image.version="1.0.20"
 LABEL maintainer="elipwns"
 
 # Prevent interactive prompts during package installation
